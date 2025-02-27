@@ -1000,9 +1000,14 @@ function ui_setattr_int(id,attr,value) { var elem = document.getElementById(UTF8
 function ui_remattr_int(id,attr) { var elem = document.getElementById(UTF8ToString(id)); elem.removeAttribute(UTF8ToString(attr)); }
 function ui_show_error_int() { showErrorModal(); }
 function open_int(name,modes,output_size) { var fileStream; if(!fileStream){ 
-    const root = await navigator.storage.getDirectory();
-    const handle = await root.getFileHandle("test_file.bin", { create: true });
-    Module.writer = handle.createWritable(); } Module.writer.ready.then(() => { innoLog("zipstream: open, ready"); }); }
+  navigator.storage.getDirectory().ready.then((root) => {
+      root.getFileHandle("test_file.bin", { create: true }).ready.then(handle => {
+        Module.writer = handle.createWritable();
+        Module.writer.ready.then(() => { innoLog("zipstream: open, ready"); });
+      });
+  });
+  
+   }  
 function __asyncjs__write_int(ptr,size,n) { return Asyncify.handleAsync(async () => { let buff = new Uint8Array(Module.HEAPU8.buffer, ptr, size*n); await Module.writer.write(buff); innoLog("zipstream: write "+(size*n)); }); }
 function close_int() { if(Module.writer) { Module.writer.close(); innoLog("zipstream: close") } else { innoLog("writer.close() requested, but writer is not yet constructed") } }
 function __asyncjs__abort_int() { return Asyncify.handleAsync(async () => { if(Module.writer) { Module.writer.abort(); } else { innoLog("writer.abort() requested, but writer is not yet constructed") } }); }
